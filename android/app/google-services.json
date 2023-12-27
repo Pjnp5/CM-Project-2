@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "967977946232",
+    "project_id": "uachado-daa26",
+    "storage_bucket": "uachado-daa26.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967977946232:android:3f908b71820c6229a6b18d",
+        "android_client_info": {
+          "package_name": "com.example.uachado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCv7VMwROeoRxqTyNzTZA_EwoDgIKHAxUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967977946232:android:32217505b2a235fca6b18d",
+        "android_client_info": {
+          "package_name": "com.example.uachado.uachado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCv7VMwROeoRxqTyNzTZA_EwoDgIKHAxUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

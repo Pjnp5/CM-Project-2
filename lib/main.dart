@@ -1,20 +1,44 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'constants/app_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    if (isLoggedIn) {
+      runApp(const MyApp(loggedIn: true));
+    } else {
+      runApp(const MyApp(loggedIn: false));
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Firebase initialization failed: $e');
+    }
+    // Handle the error or show an error message to the user
+  }
 }
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool loggedIn;
+  const MyApp({super.key, required this.loggedIn});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'UAchado',
       theme: appTheme, // Using the custom app theme
-      home: const LoginScreen(),
+      home: loggedIn ? const HomeScreen() : LoginScreen(),
     );
   }
 }
