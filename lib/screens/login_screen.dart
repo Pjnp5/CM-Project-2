@@ -145,7 +145,7 @@ class LoginScreen extends StatelessWidget {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('email', email);
-      await prefs.setString('name', fetchUserNameByEmail(email).toString());
+      await prefs.setString('name', await fetchUserNameByEmail(email));
 
       // After successful login, navigate to the main screen or dashboard
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

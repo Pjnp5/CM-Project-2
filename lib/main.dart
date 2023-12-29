@@ -1,15 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/home_screen.dart';
-import 'screens/login_screen.dart';
+
 import 'constants/app_theme.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? name = prefs.getString('name');
+  if (kDebugMode) {
+    print(name);
+  }
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   try {
     await Firebase.initializeApp(
@@ -28,9 +33,9 @@ void main() async {
   }
 }
 
-
 class MyApp extends StatelessWidget {
   final bool loggedIn;
+
   const MyApp({super.key, required this.loggedIn});
 
   @override
