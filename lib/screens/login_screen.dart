@@ -47,7 +47,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48),
                 _buildTextField(
-                    context, Icons.person, 'Username', _emailController),
+                    context, Icons.person, 'Email', _emailController),
                 const SizedBox(height: 16),
                 _buildTextField(
                     context, Icons.lock, 'Password', _passwordController,
@@ -153,11 +153,11 @@ class LoginScreen extends StatelessWidget {
         backgroundColor: Colors.green,
       ));
       // Navigate to the home screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) =>
-                const HomeScreen()), // Replace HomeScreen with your home screen widget
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false,
       );
+
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
         print(e);

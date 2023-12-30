@@ -93,9 +93,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ));
 
       // Navigate to the home screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()), // Replace HomeScreen with your home screen widget
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false,
       );
+
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Error during sign up";
       if (e.code == 'email-already-in-use') {

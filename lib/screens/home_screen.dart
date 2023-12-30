@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'droppoints_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,32 +24,81 @@ class _HomeScreenState extends State<HomeScreen> {
     return prefs.getString('name') ?? 'User';
   }
 
+  Future<String?> _getLocalImagePath(String imageUrl) async {
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    String fileName = path.basename(imageUrl);
+    File localFile = File(path.join(documentDirectory.path, fileName));
+
+    return localFile.existsSync() ? localFile.path : null;
+  }
+
+
+
+
+  Future<String> _downloadAndSaveImage(String imageUrl, String fileName) async {
+    var response = await http.get(Uri.parse(imageUrl));
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    File file = File(path.join(documentDirectory.path, fileName));
+    file.writeAsBytesSync(response.bodyBytes);
+    return file.path;
+  }
+
+  Future<bool> _checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+      return true;  // Connected to a mobile network or wifi
+    } else {
+      return false; // No internet connection
+    }
+  }
+
   Future<List<Map<String, dynamic>>> _fetchNonRetrievedItems() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('items')
-        .where('isRetrieved', isEqualTo: false)
-        .limit(5) // Adjust this limit as needed
-        .get();
+    final prefs = await SharedPreferences.getInstance();
+    bool hasInternet = await _checkInternetConnection(); // Implement this function to check internet connectivity
 
-    List<Map<String, dynamic>> itemsWithDepartment = [];
-    for (var doc in querySnapshot.docs) {
-      var item = doc.data() as Map<String, dynamic>;
-      String depStored = item['dep_stored'];
-
-      // Fetch department data
-      DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
-          .collection('departments')
-          .doc(depStored)
+    if (hasInternet) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('items')
+          .where('isRetrieved', isEqualTo: false)
+          .limit(5)
           .get();
 
-      var department = departmentSnapshot.data() as Map<String, dynamic>;
-      item['departmentName'] =
-          department['Nome']; // Add department name to item
+      List<Map<String, dynamic>> itemsWithDepartment = [];
+      for (var doc in querySnapshot.docs) {
+        var item = doc.data() as Map<String, dynamic>;
+        String depStored = item['dep_stored'];
+        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance.collection('departments').doc(depStored).get();
+        var department = departmentSnapshot.data() as Map<String, dynamic>;
+        item['departmentName'] = department['Nome'];
 
-      itemsWithDepartment.add(item);
+        // Check if the image is already downloaded
+        String imageUrl = item['image_url'];
+        String fileName = path.basename(imageUrl);
+        String? localImagePath = await _getLocalImagePath(imageUrl);
+
+        // If not, download and save the image
+        localImagePath ??= await _downloadAndSaveImage(imageUrl, fileName);
+
+        item['localImagePath'] = localImagePath; // Save the local image path
+        itemsWithDepartment.add(item);
+      }
+
+      // Store fetched data in SharedPreferences
+      await prefs.setString('lastItems', jsonEncode(itemsWithDepartment));
+      await prefs.setString('lastFetchTime', DateTime.now().toIso8601String());
+
+
+      return itemsWithDepartment;
+    } else {
+      if (prefs.containsKey('lastItems')) {
+        // Deserialize and return the stored items
+        String storedItemsJson = prefs.getString('lastItems')!;
+        List storedItems = jsonDecode(storedItemsJson) as List;
+        return storedItems.map((item) => item as Map<String, dynamic>).toList();
+      } else {
+        throw Exception('No internet connection. Please connect to the internet to fetch latest items.');
+      }
     }
-
-    return itemsWithDepartment;
   }
 
   Widget _buildFeatureCard(String title, IconData icon, String description,
@@ -102,10 +156,17 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListTile(
                 title: Text(item['description']),
                 subtitle: Text('Stored at: $initials'), // Display initials
-                leading: item['image_url'] != null
-                    ? Image.network(item['image_url'], width: 50, height: 50)
-                    : const Icon(Icons
-                        .image_not_supported), // Display an icon if no image
+                leading: FutureBuilder(
+                  future: _getLocalImagePath(item['image_url']),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                      String imagePath = snapshot.data as String; // Cast to non-nullable String
+                      return Image.file(File(imagePath), width: 50, height: 50);
+                    } else {
+                      return Image.network(item['image_url'], width: 50, height: 50);
+                    }
+                  },
+                ),
               );
             }),
           ],
