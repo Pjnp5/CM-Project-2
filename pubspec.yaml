@@ -41,10 +41,7 @@ dependencies:
   http: ^1.1.2
   path_provider: ^2.1.1
   path: ^1.8.0 # Check for the latest version
-
-
-
-
+  image_picker: ^0.8.5+3
 
 
 

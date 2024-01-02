@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/home_screen.dart';
 
 import 'constants/app_theme.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'UAchado',
       theme: appTheme, // Using the custom app theme
-      home: loggedIn ? const HomeScreen() : LoginScreen(),
+      home: loggedIn ? const AddScreen() : LoginScreen(),
     );
   }
 }
