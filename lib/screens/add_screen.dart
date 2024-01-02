@@ -23,7 +23,12 @@ class AddScreen extends StatefulWidget {
 
 class _AddScreenState extends State<AddScreen> {
   String? _selectedTag; // Make _selectedTag nullable
-  final List<String> _tags = ['Tag1', 'Tag2', 'Tag3']; // Example tags
+  final List<String> _tags = [
+    'Carteira',
+    'Relógio',
+    'Mala',
+    'Chaveiro'
+  ]; // Example tags
   final TextEditingController _descriptionController = TextEditingController();
   File? _imageFile;
 
@@ -226,55 +231,84 @@ class _AddScreenState extends State<AddScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Submit Page'),
+        title: Text('Add Item', style: GoogleFonts.montserrat()),
+        backgroundColor:
+            const Color(0xFFcab6aa), // Use the same color as in HomeScreen
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            DropdownButton<String>(
-              hint: Text('Select Tag'),
-              value: _selectedTag,
-              onChanged: (newValue) {
-                setState(() {
-                  _selectedTag = newValue;
-                });
-              },
-              items: _tags.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                'Add New Item',
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily:
+                        'Montserrat' // Use the same font family as in HomeScreen
+                    ),
               ),
-              maxLines: 3,
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Add Picture'),
-            ),
-            Container(
-              height: 200,
-              color: Colors.grey[300],
-              child: _imageFile == null
-                  ? Center(child: Text('No Image Selected'))
-                  : Image.file(_imageFile!),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: submitItem,
-              child: Text('Submit'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              DropdownButton<String>(
+                hint: Text('Select Tag'),
+                value: _selectedTag,
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedTag = newValue;
+                  });
+                },
+                items: _tags.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _pickImage,
+                      child: Text('Add Picture'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.grey, // Subdued color
+                        onPrimary: Colors.black,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: _imageFile == null
+                        ? Text('No Image Selected', textAlign: TextAlign.center)
+                        : Image.file(_imageFile!, height: 100),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: submitItem,
+                child: Text('Submit', style: GoogleFonts.montserrat()),
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor, // Prominent color
+                  onPrimary: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -284,8 +318,7 @@ class _AddScreenState extends State<AddScreen> {
     return BottomNavigationBar(
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Add'),
       ],
     );
   }
