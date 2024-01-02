@@ -146,6 +146,7 @@ class LoginScreen extends StatelessWidget {
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('email', email);
       await prefs.setString('name', await fetchUserNameByEmail(email));
+      await prefs.setBool("personnel", await fetchUserTypeByEmail(email));
 
       // After successful login, navigate to the main screen or dashboard
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -205,6 +206,25 @@ class LoginScreen extends StatelessWidget {
     } catch (e) {
       // Handle or log error
       return 'Error: ${e.toString()}';
+    }
+  }
+
+  Future fetchUserTypeByEmail(String email) async {
+    try {
+      var userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (userQuery.docs.isNotEmpty) {
+        return userQuery.docs.first.data()['dep'] ?? false;
+      } else {
+        return false; // Or handle the case when no user is found
+      }
+    } catch (e) {
+      // Handle or log error
+      return false;
     }
   }
 

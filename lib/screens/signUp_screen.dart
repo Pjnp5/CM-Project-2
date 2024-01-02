@@ -85,6 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('email', _emailController.text.trim());
       await prefs.setString('name', _nameController.text.trim());
+      await prefs.setBool('personnel', false);
 
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

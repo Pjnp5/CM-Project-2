@@ -228,7 +228,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
         ),
         key: _scaffoldKey,
         body: Container(
-            color: appTheme.colorScheme.primary.withOpacity(0.3),
+            color: appTheme.colorScheme.secondary,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: ListView.builder(
@@ -241,7 +241,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
-                    color: appTheme.colorScheme.secondary.withAlpha(100),
+                    color: appTheme.colorScheme.secondary.withOpacity(0.6),
                     // Single color for the card
                     child: ExpansionTile(
                       leading: customMarker.localImagePath != null
@@ -294,7 +294,9 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
                   );
                 },
               ),
-            )));
+            )),
+        bottomNavigationBar: _buildBottomNavigationBar(),
+    );
   }
 
   void _updateMarkersAndCamera(Marker marker) {
@@ -333,5 +335,17 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
 
     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
     _mapController?.animateCamera(cameraUpdate);
+  }
+
+  Widget _buildBottomNavigationBar() {
+
+    return BottomNavigationBar(
+      backgroundColor: const Color(0xFFcab6aa),
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+      ],
+    );
   }
 }

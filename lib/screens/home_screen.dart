@@ -1,15 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'droppoints_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/screens/foundItems_screen.dart';
 
+import '../constants/app_theme.dart';
+import 'droppoints_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +22,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _isPersonnel = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserType();
+    // Other initializations...
+  }
+
   Future<String> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('name') ?? 'User';
@@ -32,8 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return localFile.existsSync() ? localFile.path : null;
   }
 
-
-
+  Future<void> _loadUserType() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isPersonnel = prefs.getBool('personnel') ?? false;
+    });
+  }
 
   Future<String> _downloadAndSaveImage(String imageUrl, String fileName) async {
     var response = await http.get(Uri.parse(imageUrl));
@@ -45,8 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<bool> _checkInternetConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
-      return true;  // Connected to a mobile network or wifi
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      return true; // Connected to a mobile network or wifi
     } else {
       return false; // No internet connection
     }
@@ -54,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchNonRetrievedItems() async {
     final prefs = await SharedPreferences.getInstance();
-    bool hasInternet = await _checkInternetConnection(); // Implement this function to check internet connectivity
+    bool hasInternet =
+        await _checkInternetConnection(); // Implement this function to check internet connectivity
 
     if (hasInternet) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -67,9 +85,13 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var doc in querySnapshot.docs) {
         var item = doc.data() as Map<String, dynamic>;
         String depStored = item['dep_stored'];
-        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance.collection('departments').doc(depStored).get();
+        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
+            .collection('departments')
+            .doc(depStored)
+            .get();
         var department = departmentSnapshot.data() as Map<String, dynamic>;
         item['departmentName'] = department['Nome'];
+
 
         // Check if the image is already downloaded
         String imageUrl = item['image_url'];
@@ -87,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
       await prefs.setString('lastItems', jsonEncode(itemsWithDepartment));
       await prefs.setString('lastFetchTime', DateTime.now().toIso8601String());
 
-
       return itemsWithDepartment;
     } else {
       if (prefs.containsKey('lastItems')) {
@@ -96,7 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
         List storedItems = jsonDecode(storedItemsJson) as List;
         return storedItems.map((item) => item as Map<String, dynamic>).toList();
       } else {
-        throw Exception('No internet connection. Please connect to the internet to fetch latest items.');
+        throw Exception(
+            'No internet connection. Please connect to the internet to fetch latest items.');
       }
     }
   }
@@ -159,11 +181,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: FutureBuilder(
                   future: _getLocalImagePath(item['image_url']),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-                      String imagePath = snapshot.data as String; // Cast to non-nullable String
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.data != null) {
+                      String imagePath = snapshot.data
+                          as String; // Cast to non-nullable String
                       return Image.file(File(imagePath), width: 50, height: 50);
                     } else {
-                      return Image.network(item['image_url'], width: 50, height: 50);
+                      return Image.network(item['image_url'],
+                          width: 50, height: 50);
                     }
                   },
                 ),
@@ -175,6 +200,84 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildUserSpecificOptions() {
+    if (_isPersonnel) {
+      return Column(
+        children: [
+          const SizedBox(height: 20),
+          _buildFeatureCard(
+            'Locate Item Drop Points',
+            Icons.map,
+            'Find nearby locations to leave or pick up items',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DropOffPointsScreen())),
+          ),
+          _buildFeatureCard(
+            'View Items',
+            Icons.view_list,
+            'Browse through items reported in the system',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FoundItemsScreen())),
+          ),
+          _buildFeatureCard(
+            'Report Found Item',
+            Icons.report_problem,
+            'Report an item that was dropped in your Point',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DropOffPointsScreen())),
+          ),
+          // Other personnel-specific options...
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          const SizedBox(height: 20),
+          _buildFeatureCard(
+            'Locate Item Drop Points',
+            Icons.map,
+            'Find nearby locations to leave or pick up items',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DropOffPointsScreen())),
+          ),
+          _buildFeatureCard(
+            'View Items',
+            Icons.view_list,
+            'Browse through items reported in the system',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DropOffPointsScreen())),
+          ),
+          _buildFeatureCard(
+            'Report Lost Item',
+            Icons.report_problem,
+            'Report an item you lost found',
+            context,
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DropOffPointsScreen())),
+          ),
+          // Other personnel-specific options...
+        ],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('UAchado', style: GoogleFonts.montserrat()),
         backgroundColor: const Color(0xFFcab6aa),
       ),
+      backgroundColor: appTheme.colorScheme.secondary, // Set background color here
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -203,36 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              _buildFeatureCard(
-                'Locate Item Drop Points',
-                Icons.map,
-                'Find nearby locations to leave or pick up items',
-                context,
-                () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DropOffPointsScreen())),
-              ),
-              _buildFeatureCard(
-                'View Items',
-                Icons.view_list,
-                'Browse through items reported in the system',
-                context,
-                () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DropOffPointsScreen())),
-              ),
-              _buildFeatureCard(
-                'Report Lost Item',
-                Icons.report_problem,
-                'Report an item you have lost',
-                context,
-                () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DropOffPointsScreen())),
-              ),
+              _buildUserSpecificOptions(),
               const SizedBox(height: 20),
               _buildLatestItemsSection(),
             ],
@@ -245,6 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
+      backgroundColor: const Color(0xFFcab6aa),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
