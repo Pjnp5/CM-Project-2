@@ -3,13 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/main.dart';
 import 'droppoints_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,9 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return localFile.existsSync() ? localFile.path : null;
   }
 
-
-
-
   Future<String> _downloadAndSaveImage(String imageUrl, String fileName) async {
     var response = await http.get(Uri.parse(imageUrl));
     var documentDirectory = await getApplicationDocumentsDirectory();
@@ -45,8 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<bool> _checkInternetConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
-      return true;  // Connected to a mobile network or wifi
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      return true; // Connected to a mobile network or wifi
     } else {
       return false; // No internet connection
     }
@@ -54,7 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchNonRetrievedItems() async {
     final prefs = await SharedPreferences.getInstance();
-    bool hasInternet = await _checkInternetConnection(); // Implement this function to check internet connectivity
+    bool hasInternet =
+        await _checkInternetConnection(); // Implement this function to check internet connectivity
 
     if (hasInternet) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -67,7 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var doc in querySnapshot.docs) {
         var item = doc.data() as Map<String, dynamic>;
         String depStored = item['dep_stored'];
-        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance.collection('departments').doc(depStored).get();
+        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
+            .collection('departments')
+            .doc(depStored)
+            .get();
         var department = departmentSnapshot.data() as Map<String, dynamic>;
         item['departmentName'] = department['Nome'];
 
@@ -87,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
       await prefs.setString('lastItems', jsonEncode(itemsWithDepartment));
       await prefs.setString('lastFetchTime', DateTime.now().toIso8601String());
 
-
       return itemsWithDepartment;
     } else {
       if (prefs.containsKey('lastItems')) {
@@ -96,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
         List storedItems = jsonDecode(storedItemsJson) as List;
         return storedItems.map((item) => item as Map<String, dynamic>).toList();
       } else {
-        throw Exception('No internet connection. Please connect to the internet to fetch latest items.');
+        throw Exception(
+            'No internet connection. Please connect to the internet to fetch latest items.');
       }
     }
   }
@@ -159,11 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: FutureBuilder(
                   future: _getLocalImagePath(item['image_url']),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-                      String imagePath = snapshot.data as String; // Cast to non-nullable String
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.data != null) {
+                      String imagePath = snapshot.data
+                          as String; // Cast to non-nullable String
                       return Image.file(File(imagePath), width: 50, height: 50);
                     } else {
-                      return Image.network(item['image_url'], width: 50, height: 50);
+                      return Image.network(item['image_url'],
+                          width: 50, height: 50);
                     }
                   },
                 ),
@@ -239,16 +245,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      //bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
   Widget _buildBottomNavigationBar() {
+    final appState = Provider.of<MyAppState>(context);
+
     return BottomNavigationBar(
+      currentIndex: appState.currentIndex,
+      onTap: (index) {
+        appState.currentIndex = index;
+      },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Add'),
       ],
     );
   }
