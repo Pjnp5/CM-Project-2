@@ -1,18 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'droppoints_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/foundItems_screen.dart';
-
 import '../constants/app_theme.dart';
-import 'droppoints_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -314,18 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
+      //bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 }
