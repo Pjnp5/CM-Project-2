@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/models/item.dart';
 import 'droppoints_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -32,8 +35,11 @@ class _AddScreenState extends State<AddScreen> {
   Future<void> _getImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      String imageUrl = await uploadImage(imageFile);
+      await saveImageData(imageUrl);
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = imageFile;
       });
     }
   }
@@ -67,6 +73,28 @@ class _AddScreenState extends State<AddScreen> {
     );
   }
 
+  Future<String> uploadImage(File imageFile) async {
+    String fileName =
+        'images/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}';
+    Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+    UploadTask uploadTask = storageRef.putFile(imageFile);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  Future<void> saveImageData(String imageUrl) async {
+    CollectionReference images =
+        FirebaseFirestore.instance.collection('images');
+    return images
+        .add({
+          'url': imageUrl,
+          // Add other data if necessary
+        })
+        .then((value) => print("Image Added"))
+        .catchError((error) => print("Failed to add image: $error"));
+  }
+
   Future<String?> _getLocalImagePath(String imageUrl) async {
     var documentDirectory = await getApplicationDocumentsDirectory();
     String fileName = path.basename(imageUrl);
@@ -91,6 +119,41 @@ class _AddScreenState extends State<AddScreen> {
     } else {
       return false; // No internet connection
     }
+  }
+
+  Future<void> submitItem() async {
+    if (_imageFile == null ||
+        _selectedTag == null ||
+        _descriptionController.text.isEmpty) {
+      print('All fields are required.');
+      return;
+    }
+
+    try {
+      // Upload image to Firebase Storage
+      String imageUrl = await uploadImage(_imageFile!);
+
+      // Create an Item object
+      Item newItem = Item(
+        description: _descriptionController.text,
+        tag: _selectedTag!,
+        imageUrl: imageUrl,
+      );
+
+      // Save the item to Firestore
+      await saveItemData(newItem.toJson());
+      print('Item uploaded successfully');
+    } catch (e) {
+      print('Error uploading item: $e');
+    }
+  }
+
+  Future<void> saveItemData(Map<String, dynamic> itemData) async {
+    CollectionReference items = FirebaseFirestore.instance.collection('items');
+    return items
+        .add(itemData)
+        .then((value) => print("Item Added"))
+        .catchError((error) => print("Failed to add item: $error"));
   }
 
   Future<List<Map<String, dynamic>>> _fetchNonRetrievedItems() async {
@@ -208,9 +271,7 @@ class _AddScreenState extends State<AddScreen> {
             ),
             SizedBox(height: 10),
             ElevatedButton(
-              onPressed: () {
-                // Submit logic
-              },
+              onPressed: submitItem,
               child: Text('Submit'),
             ),
           ],
