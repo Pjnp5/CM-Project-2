@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/add_screen.dart';
+import 'package:uachado/screens/droppoints_screen.dart';
+import 'package:uachado/screens/foundItems_screen.dart';
 import 'package:uachado/screens/home_screen.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,14 +26,14 @@ void main() async {
       runApp(
         ChangeNotifierProvider(
           create: (context) => MyAppState(),
-          child: MyApp(loggedIn: true),
+          child: const MyApp(loggedIn: true),
         ),
       );
     } else {
       runApp(
         ChangeNotifierProvider(
           create: (context) => MyAppState(),
-          child: MyApp(loggedIn: false),
+          child: const MyApp(loggedIn: false),
         ),
       );
     }
@@ -56,21 +59,24 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             home: Scaffold(
               body: appState.currentPage,
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: appState.currentIndex,
-                onTap: (index) {
-                  appState.currentIndex = index;
-                },
-                items: const [
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.home), label: 'Home'),
-                  BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
-                ],
-              ),
             ),
           );
         },
       ),
+    );
+  }
+}
+
+// Create a new widget for the main layout
+class MainLayout extends StatelessWidget {
+  final Widget child;
+
+  const MainLayout({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: child,
     );
   }
 }
@@ -87,9 +93,8 @@ class MyAppState extends ChangeNotifier {
 
   // Define your pages here
   final List<Widget> pages = [
-    HomeScreen(), // First page
-    AddScreen(), // Second page
+    const HomeScreen(), // First page
   ];
 
-  Widget get currentPage => pages[_currentIndex];
+  Widget get currentPage => MainLayout(child: pages[_currentIndex]);
 }

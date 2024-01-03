@@ -241,7 +241,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
-                    color: appTheme.colorScheme.secondary.withOpacity(0.6),
+                    color: appTheme.colorScheme.primary.withOpacity(0.45),
                     // Single color for the card
                     child: ExpansionTile(
                       leading: customMarker.localImagePath != null
@@ -341,6 +341,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
 
     return BottomNavigationBar(
       backgroundColor: const Color(0xFFcab6aa),
+      selectedItemColor: appTheme.colorScheme.primary,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),

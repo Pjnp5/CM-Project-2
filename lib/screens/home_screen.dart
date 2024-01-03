@@ -1,16 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'droppoints_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/foundItems_screen.dart';
+
 import '../constants/app_theme.dart';
+import 'droppoints_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserType();
-    // Other initializations...
   }
 
   Future<String> _loadUserName() async {
@@ -90,7 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
         var department = departmentSnapshot.data() as Map<String, dynamic>;
         item['departmentName'] = department['Nome'];
 
-
         // Check if the image is already downloaded
         String imageUrl = item['image_url'];
         String fileName = path.basename(imageUrl);
@@ -125,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       BuildContext context, VoidCallback onTap) {
     return Card(
       elevation: 4,
+      color: appTheme.colorScheme.secondary,
       child: ListTile(
         leading: Icon(icon, size: 30),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -156,26 +158,22 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             ...snapshot.data!.map((item) {
               // Extract initials (capital letters) from the department name
-              String departmentName = item['departmentName'];
-              String initials = '';
-              if (departmentName
-                      .replaceAll(RegExp(r'[^A-Za-z ]'), '')
-                      .split(' ')
-                      .length >
-                  2) {
-                initials = departmentName
-                    .replaceAll(RegExp(r'[^A-Za-z ]'),
-                        '') // Remove non-alphabetic characters
-                    .split(' ')
-                    .where((word) =>
-                        word.isNotEmpty && word[0] == word[0].toUpperCase())
-                    .map((word) => word[0].toUpperCase())
-                    .join();
+              String departmentName = item['departmentName']
+                  .replaceAll(RegExp(r'[^A-Za-z ]'),
+                      '') // Remove non-alphabetic characters
+                  .split(' ')
+                  .where((word) =>
+                      word.isNotEmpty && word[0] == word[0].toUpperCase())
+                  .map((word) => word[0].toUpperCase())
+                  .join();
+              if (departmentName.length > 2) {
+                item['departmentName'] = departmentName;
               }
 
               return ListTile(
                 title: Text(item['description']),
-                subtitle: Text('Stored at: $initials'), // Display initials
+                subtitle: Text('Stored at: ${item["departmentName"]}'),
+                // Display initials
                 leading: FutureBuilder(
                   future: _getLocalImagePath(item['image_url']),
                   builder: (context, snapshot) {
@@ -221,17 +219,15 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => FoundItemsScreen())),
+                    builder: (context) => const FoundItemsScreen())),
           ),
           _buildFeatureCard(
             'Report Found Item',
             Icons.report_problem,
             'Report an item that was dropped in your Point',
             context,
-            () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DropOffPointsScreen())),
+            () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const AddScreen())),
           ),
           // Other personnel-specific options...
         ],
@@ -258,17 +254,15 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const DropOffPointsScreen())),
+                    builder: (context) => const FoundItemsScreen())),
           ),
           _buildFeatureCard(
             'Report Lost Item',
             Icons.report_problem,
             'Report an item you lost found',
             context,
-            () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DropOffPointsScreen())),
+            () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const AddScreen())),
           ),
           // Other personnel-specific options...
         ],
@@ -283,7 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('UAchado', style: GoogleFonts.montserrat()),
         backgroundColor: const Color(0xFFcab6aa),
       ),
-      backgroundColor: appTheme.colorScheme.secondary, // Set background color here
+      backgroundColor: appTheme.colorScheme.secondary,
+      // Set background color here
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -312,7 +307,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      //bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      backgroundColor: const Color(0xFFcab6aa),
+      selectedItemColor: appTheme.colorScheme.primary,
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+      ],
     );
   }
 }

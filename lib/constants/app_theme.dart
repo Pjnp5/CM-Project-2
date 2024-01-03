@@ -28,5 +28,8 @@ final ThemeData appTheme = ThemeData(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
     ),
   ),
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    selectedItemColor: Color(0xFFcab6aa),
+  ),
   useMaterial3: true,
 );
