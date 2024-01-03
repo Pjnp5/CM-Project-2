@@ -40,7 +40,6 @@ class _AddScreenState extends State<AddScreen> {
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
       String imageUrl = await uploadImage(imageFile);
-      await saveImageData(imageUrl);
       setState(() {
         _imageFile = imageFile;
       });
@@ -84,18 +83,6 @@ class _AddScreenState extends State<AddScreen> {
     TaskSnapshot taskSnapshot = await uploadTask;
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
     return downloadUrl;
-  }
-
-  Future<void> saveImageData(String imageUrl) async {
-    CollectionReference images =
-        FirebaseFirestore.instance.collection('images');
-    return images
-        .add({
-          'url': imageUrl,
-          // Add other data if necessary
-        })
-        .then((value) => print("Image Added"))
-        .catchError((error) => print("Failed to add image: $error"));
   }
 
   Future<String?> _getLocalImagePath(String imageUrl) async {
