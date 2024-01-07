@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/home_screen.dart';
+import 'package:uachado/screens/login_screen.dart';
 import 'package:uachado/utils/notification_system.dart';
 
 import 'firebase_options.dart';
@@ -12,11 +13,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  final GlobalKey<ScaffoldMessengerState> scaffoldKey =
+  GlobalKey<ScaffoldMessengerState>(); // Create a
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    final fcmService = FCMService();
+    final fcmService = FCMService(scaffoldKey: scaffoldKey);
     fcmService.initialize();
     if (isLoggedIn) {
       runApp(
@@ -48,7 +51,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    if (loggedIn) {
+      return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: Consumer<MyAppState>(
         builder: (context, appState, child) {
@@ -60,6 +64,20 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+    } else {
+      return ChangeNotifierProvider(
+        create: (context) => MyAppState(),
+        child: Consumer<MyAppState>(
+          builder: (context, appState, child) {
+            return MaterialApp(
+              home: Scaffold(
+                body: LoginScreen(),
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 }
 

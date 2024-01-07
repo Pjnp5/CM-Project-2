@@ -144,8 +144,8 @@ class _AddScreenState extends State<AddScreen> {
       _showSnackBar('Item uploaded successfully', Colors.green);
 
       // After uploading, send a notification to users interested in the tag
-      sendNotificationToFlask(newItem.tag, 'New Item Available',
-          'A new item has been added', imageUrl);
+      sendNotificationToFlask(newItem.tag, "New ${newItem.tag} found!",
+          newItem.description, imageUrl);
 
       _resetForm();
     } catch (e) {
@@ -157,7 +157,7 @@ class _AddScreenState extends State<AddScreen> {
 
   Future<void> sendNotificationToFlask(
       String topic, String title, String message, String imageUrl) async {
-    const url = 'YOUR_FLASK_SERVER_URL/sendNotification';
+    const url = 'https://3fa4e216-8de8-4a49-9951-bb62ce93a50c-00-14nwu0jvbudbk.riker.replit.dev/sendNotification';
     final headers = {'Content-Type': 'application/json'};
     final body = {
       'topic': topic,

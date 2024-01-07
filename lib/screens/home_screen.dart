@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/foundItems_screen.dart';
 import 'package:uachado/screens/item_retrieved.dart';
+import 'package:uachado/screens/subscription_screen.dart';
 
 import '../constants/app_theme.dart';
 import 'droppoints_screen.dart';
@@ -279,10 +280,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildFeatureCard(
             'Report Lost Item',
             Icons.report_problem,
-            'Report an item you lost found',
+            'Subscribe to a topic and when a new item shows up you will know',
             context,
             () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const AddScreen())),
+                MaterialPageRoute(builder: (context) => const SubscriptionScreen())),
           ),
           // Other personnel-specific options...
         ],

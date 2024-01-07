@@ -68,6 +68,7 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
           .collection('departments')
           .doc(depStored)
           .get();
+      print(item);
       var department = departmentSnapshot.data() as Map<String, dynamic>;
       var departmentName = department['Nome']
           .replaceAll(
