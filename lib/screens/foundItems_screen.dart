@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_theme.dart';
+import '../utils/custom_drawer.dart';
 
 class FoundItemsScreen extends StatefulWidget {
   const FoundItemsScreen({super.key});
@@ -11,14 +13,32 @@ class FoundItemsScreen extends StatefulWidget {
 }
 
 class _FoundItemsScreenState extends State<FoundItemsScreen> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+  List<Map<String, dynamic>> itemsWithDepartment = [];
   String? selectedTag = 'Todos'; // Default to 'All'
   List<String> tags = ['Todos']; // Initialize with 'All'
+  String _userName = '';
+  String _userEmail = '';
+  bool _personel = false;
 
   @override
   void initState() {
     super.initState();
     _fetchTags(); // Fetch tags when the screen loads
     _fetchFoundItems(); // Fetch items when the screen loads
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName =
+          prefs.getString('name') ?? 'User Name'; // Default name if not found
+      _userEmail = prefs.getString('email') ??
+          'user@example.com'; // Default email if not found
+      _personel = prefs.getBool('personnel') ?? false;
+    });
   }
 
   Future<void> _fetchTags() async {
@@ -33,7 +53,8 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
   Future<List<Map<String, dynamic>>> _fetchFoundItems() async {
     var query = FirebaseFirestore.instance
         .collection('items')
-        .where('isRetrieved', isEqualTo: false);
+        .where('isRetrieved', isEqualTo: false)
+        .orderBy("dateAdded", descending: true);
     if (selectedTag != 'Todos') {
       query = query.where('tag', isEqualTo: selectedTag);
     }
@@ -74,62 +95,86 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
         title: const Text('Found Items'),
         backgroundColor: const Color(0xFFcab6aa),
       ),
+      endDrawer: CustomDrawer(
+        userName: _userName,
+        userEmail: _userEmail,
+        personel: _personel,
+        onItemsListScreen: true,
+        onDropPoints: false,
+        onFoundItem: false,
+        onItemRetrieved: false,
+      ),
       body: Column(
         children: [
           Center(
             // Center the dropdown
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DropdownButton<String>(
-                value: selectedTag,
-                items: tags.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedTag = newValue;
-                    _fetchFoundItems(); // Refetch items with the new tag
-                  });
-                },
-                dropdownColor: appTheme.colorScheme.secondary.withAlpha(230), // Set the dropdown background color
-              )
-            ),
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButton<String>(
+                  value: selectedTag,
+                  items: tags.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedTag = newValue;
+                      _fetchFoundItems(); // Refetch items with the new tag
+                    });
+                  },
+                  dropdownColor: appTheme.colorScheme.secondary
+                      .withAlpha(230), // Set the dropdown background color
+                )),
           ),
           Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _fetchFoundItems(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    width: 200, // Set the width to match the image width
-                    height: 200, // Set a fixed height for the CircularProgressIndicator
-                    alignment: Alignment.center, // Center the CircularProgressIndicator
-                    child: CircularProgressIndicator(
-                      backgroundColor: appTheme.colorScheme.primary, // Background color
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        appTheme.colorScheme.secondary, // Color of the indicator itself
-                      ),
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("Error: ${snapshot.error}");
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("No items found");
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      return _buildItemCard(snapshot.data![index]);
-                    },
-                  );
-                }
+            child: RefreshIndicator(
+              key: _refreshIndicatorKey,
+              color: appTheme.colorScheme.primary,
+              onRefresh: () async {
+                setState(() async {
+                  itemsWithDepartment.clear();
+                  itemsWithDepartment = await _fetchFoundItems();
+                  ;
+                });
               },
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _fetchFoundItems(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      width: 200,
+                      // Set the width to match the image width
+                      height: 200,
+                      // Set a fixed height for the CircularProgressIndicator
+                      alignment: Alignment.center,
+                      // Center the CircularProgressIndicator
+                      child: CircularProgressIndicator(
+                        backgroundColor: appTheme.colorScheme.primary,
+                        // Background color
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          appTheme.colorScheme
+                              .secondary, // Color of the indicator itself
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text("No items found");
+                  } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return _buildItemCard(snapshot.data![index]);
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-
+          )
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),

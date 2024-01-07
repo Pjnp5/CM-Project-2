@@ -3,25 +3,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uachado/screens/add_screen.dart';
-import 'package:uachado/screens/droppoints_screen.dart';
-import 'package:uachado/screens/foundItems_screen.dart';
 import 'package:uachado/screens/home_screen.dart';
+import 'package:uachado/utils/notification_system.dart';
 
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? name = prefs.getString('name');
-  if (kDebugMode) {
-    print(name);
-  }
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    final fcmService = FCMService();
+    fcmService.initialize();
     if (isLoggedIn) {
       runApp(
         ChangeNotifierProvider(

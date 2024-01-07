@@ -1,15 +1,17 @@
 import 'dart:io';
 import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../constants/app_theme.dart';
-import 'login_screen.dart';
+import '../utils/custom_drawer.dart';
 
 class DropOffPointsScreen extends StatefulWidget {
   const DropOffPointsScreen({super.key});
@@ -23,7 +25,10 @@ class CustomMarker {
   final Map<String, dynamic> additionalData;
   String? localImagePath;
 
-  CustomMarker({required this.marker, required this.additionalData, this.localImagePath});
+  CustomMarker(
+      {required this.marker,
+      required this.additionalData,
+      this.localImagePath});
 }
 
 class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
@@ -35,6 +40,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _userName = '';
   String _userEmail = '';
+  bool _personel = false;
 
   @override
   void initState() {
@@ -51,6 +57,7 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
           prefs.getString('name') ?? 'User Name'; // Default name if not found
       _userEmail = prefs.getString('email') ??
           'user@example.com'; // Default email if not found
+      _personel = prefs.getBool('personnel') ?? false;
     });
   }
 
@@ -76,7 +83,10 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
         localImagePath = await _downloadAndSaveImage(imageUrl, fileName);
       }
 
-      newMarkers.add(CustomMarker(marker: marker, additionalData: data, localImagePath: localImagePath));
+      newMarkers.add(CustomMarker(
+          marker: marker,
+          additionalData: data,
+          localImagePath: localImagePath));
     }
 
     setState(() {
@@ -99,7 +109,6 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
     file.writeAsBytesSync(response.bodyBytes);
     return file.path;
   }
-
 
   Future<void> _getUserLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -141,161 +150,96 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Drop-Off Points'),
-          backgroundColor: const Color(0xFFcab6aa),
-          elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-            ),
-          ],
-        ),
-        endDrawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              UserAccountsDrawerHeader(
-                accountName: Text(_userName),
-                accountEmail: Text(_userEmail),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    _userName.isNotEmpty ? _userName[0] : "U",
-                    style: const TextStyle(fontSize: 40.0),
+      appBar: AppBar(
+        title: const Text('Drop-Off Points'),
+        backgroundColor: const Color(0xFFcab6aa),
+        elevation: 0,
+      ),
+      endDrawer: CustomDrawer(
+        userName: _userName,
+        userEmail: _userEmail,
+        personel: _personel,
+        onItemsListScreen: false,
+        onDropPoints: true,
+        onFoundItem: false,
+        onItemRetrieved:false,
+      ),
+      key: _scaffoldKey,
+      body: Container(
+          color: appTheme.colorScheme.secondary,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: ListView.builder(
+              itemCount: _allMarkers.length,
+              itemBuilder: (context, index) {
+                var customMarker = _allMarkers[index];
+                return Card(
+                  elevation: 8.0,
+                  margin: const EdgeInsets.all(10.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
-                ),
-                decoration: const BoxDecoration(color: Color(0xFFcab6aa)),
-              ),
-              ListTile(
-                leading: const Icon(Icons.list),
-                title: const Text('Items List'),
-                onTap: () {
-                  // Navigate to Items List
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.report_problem),
-                title: const Text('Report Lost Item'),
-                onTap: () {
-                  // Navigate to Report Lost Item
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () {
-                  // Navigate to Settings
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text('Logout'),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            // Close the dialog
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // Clear user data or handle logout logic
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => LoginScreen()),
-                                (Route<dynamic> route) => false,
-                              );
-                            },
-                            child: const Text('Logout'),
-                          ),
-                        ],
-                      );
+                  color: appTheme.colorScheme.primary.withOpacity(0.45),
+                  // Single color for the card
+                  child: ExpansionTile(
+                    leading: customMarker.localImagePath != null
+                        ? Image.file(File(customMarker.localImagePath!),
+                            width: 50, height: 50)
+                        : (customMarker.additionalData['image']?.isNotEmpty ??
+                                false)
+                            ? Image.network(
+                                customMarker.additionalData['image'],
+                                width: 50,
+                                height: 50)
+                            : const Icon(Icons.location_on,
+                                size: 50.0, color: Colors.white),
+                    title: Text(
+                      customMarker.marker.infoWindow.title ?? '',
+                      style: appTheme.textTheme.headlineMedium,
+                    ),
+                    trailing: const Icon(Icons.keyboard_arrow_down,
+                        color: Colors.white),
+                    onExpansionChanged: (bool expanded) {
+                      if (expanded) {
+                        _updateMarkersAndCamera(customMarker.marker);
+                      }
                     },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        key: _scaffoldKey,
-        body: Container(
-            color: appTheme.colorScheme.secondary,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: ListView.builder(
-                itemCount: _allMarkers.length,
-                itemBuilder: (context, index) {
-                  var customMarker = _allMarkers[index];
-                  return Card(
-                    elevation: 8.0,
-                    margin: const EdgeInsets.all(10.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    color: appTheme.colorScheme.primary.withOpacity(0.45),
-                    // Single color for the card
-                    child: ExpansionTile(
-                      leading: customMarker.localImagePath != null
-                          ? Image.file(File(customMarker.localImagePath!), width: 50, height: 50)
-                          : (customMarker.additionalData['image']?.isNotEmpty ?? false)
-                          ? Image.network(customMarker.additionalData['image'], width: 50, height: 50)
-                          : const Icon(Icons.location_on, size: 50.0, color: Colors.white),
-                      title: Text(
-                        customMarker.marker.infoWindow.title ?? '',
-                        style: appTheme.textTheme.headlineMedium,
-                      ),
-                      trailing: const Icon(Icons.keyboard_arrow_down,
-                          color: Colors.white),
-                      onExpansionChanged: (bool expanded) {
-                        if (expanded) {
-                          _updateMarkersAndCamera(customMarker.marker);
-                        }
-                      },
-                      children: [
-                        SizedBox(
-                          height: 200,
-                          child: GoogleMap(
-                            onMapCreated: _onMapCreated,
-                            initialCameraPosition: CameraPosition(
-                              target: _userLocation ??
-                                  const LatLng(
-                                      40.630879814996, -8.657001829983233),
-                              // Default or current location
-                              zoom: 15.0,
-                            ),
-                            myLocationEnabled: true,
-                            // Enable the blue dot
-                            myLocationButtonEnabled: true,
-                            // Enable location button for centering map on current location
-                            markers: Set.from(
-                                _selectedMarkers.map((customMarker) => Marker(
-                                      markerId: customMarker.marker.markerId,
-                                      position: customMarker.marker.position,
-                                      icon: BitmapDescriptor
-                                          .defaultMarkerWithHue(BitmapDescriptor
-                                              .hueOrange), // Change marker icon
-                                    ))),
-                            mapType: MapType.normal,
-                            // Apply custom map style if needed
-                            zoomControlsEnabled: false, // Remove zoom controls
+                    children: [
+                      SizedBox(
+                        height: 200,
+                        child: GoogleMap(
+                          onMapCreated: _onMapCreated,
+                          initialCameraPosition: CameraPosition(
+                            target: _userLocation ??
+                                const LatLng(
+                                    40.630879814996, -8.657001829983233),
+                            // Default or current location
+                            zoom: 15.0,
                           ),
+                          myLocationEnabled: true,
+                          // Enable the blue dot
+                          myLocationButtonEnabled: true,
+                          // Enable location button for centering map on current location
+                          markers: Set.from(
+                              _selectedMarkers.map((customMarker) => Marker(
+                                    markerId: customMarker.marker.markerId,
+                                    position: customMarker.marker.position,
+                                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                                        BitmapDescriptor
+                                            .hueOrange), // Change marker icon
+                                  ))),
+                          mapType: MapType.normal,
+                          // Apply custom map style if needed
+                          zoomControlsEnabled: false, // Remove zoom controls
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )),
-        bottomNavigationBar: _buildBottomNavigationBar(),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -338,7 +282,6 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
   }
 
   Widget _buildBottomNavigationBar() {
-
     return BottomNavigationBar(
       backgroundColor: const Color(0xFFcab6aa),
       selectedItemColor: appTheme.colorScheme.primary,

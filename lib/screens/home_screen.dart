@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/foundItems_screen.dart';
+import 'package:uachado/screens/item_retrieved.dart';
 
 import '../constants/app_theme.dart';
 import 'droppoints_screen.dart';
@@ -69,6 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  DateTime timestampToDateTime(Timestamp timestamp) {
+    return timestamp.toDate();
+  }
+
   Future<List<Map<String, dynamic>>> _fetchNonRetrievedItems() async {
     final prefs = await SharedPreferences.getInstance();
     bool hasInternet =
@@ -77,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hasInternet) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('items')
+          .orderBy('dateAdded', descending: true)
           .where('isRetrieved', isEqualTo: false)
           .limit(5)
           .get();
@@ -102,6 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
         item['localImagePath'] = localImagePath; // Save the local image path
         itemsWithDepartment.add(item);
+      }
+
+      for (var item in itemsWithDepartment) {
+        item['dateAdded'] =
+            timestampToDateTime(item['dateAdded']).toIso8601String();
       }
 
       // Store fetched data in SharedPreferences
@@ -141,7 +152,16 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _fetchNonRetrievedItems(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return Container(
+            height: 200, // Set a fixed height for the CircularProgressIndicator
+            alignment: Alignment.center, // Center the CircularProgressIndicator
+            child: CircularProgressIndicator(
+              backgroundColor: appTheme.colorScheme.primary, // Background color
+              valueColor: AlwaysStoppedAnimation<Color>(
+                appTheme.colorScheme.secondary, // Color of the indicator itself
+              ),
+            ),
+          );
         }
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
@@ -202,14 +222,14 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const SizedBox(height: 20),
           _buildFeatureCard(
-            'Locate Item Drop Points',
-            Icons.map,
-            'Find nearby locations to leave or pick up items',
+            'Mark Item as Found',
+            Icons.check,
+            'See department inventory and mark items as retrieved',
             context,
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const DropOffPointsScreen())),
+                    builder: (context) => const RetrievedItemScreen())),
           ),
           _buildFeatureCard(
             'View Items',
