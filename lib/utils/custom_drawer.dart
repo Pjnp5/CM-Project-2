@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/droppoints_screen.dart';
 import 'package:uachado/screens/item_retrieved.dart';
+import 'package:uachado/screens/subscription_screen.dart';
 
 import '../screens/foundItems_screen.dart';
 import '../screens/login_screen.dart';
@@ -24,10 +25,10 @@ class CustomDrawer extends StatelessWidget {
     required this.onFoundItem,
     required this.onDropPoints, // Initialize this variable
     required this.onItemRetrieved,
-
   }); // Pass key parameter to super constructor
 
-  void _navigateToItemsList(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  void _navigateToItemsList(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     // Handle navigation to Items List screen
     Navigator.push(
       context,
@@ -38,7 +39,8 @@ class CustomDrawer extends StatelessWidget {
     });
   }
 
-  void _navigateToReportLostItem(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  void _navigateToReportLostItem(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddScreen()),
@@ -48,7 +50,8 @@ class CustomDrawer extends StatelessWidget {
     });
   }
 
-  void _navigateToDropPoints(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  void _navigateToDropPoints(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const DropOffPointsScreen()),
@@ -58,7 +61,8 @@ class CustomDrawer extends StatelessWidget {
     });
   }
 
-  void _navigateToRetrieveItem(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  void _navigateToRetrieveItem(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const RetrievedItemScreen()),
@@ -68,7 +72,19 @@ class CustomDrawer extends StatelessWidget {
     });
   }
 
-  void _navigateToSettings(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+  void _navigateToNotifications(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+    ).then((_) {
+      // After navigating back from the new page, close the drawer if needed
+      scaffoldKey.currentState?.closeEndDrawer();
+    });
+  }
+
+  void _navigateToSettings(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     // Handle navigation to Settings screen
     // ...
   }
@@ -129,9 +145,9 @@ class CustomDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: const Text('Subscribe tag'),
             onTap: () {
-              _navigateToSettings(context, scaffoldKey);
+              _navigateToNotifications(context, scaffoldKey);
             },
           ),
           ListTile(

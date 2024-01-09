@@ -157,7 +157,8 @@ class _AddScreenState extends State<AddScreen> {
 
   Future<void> sendNotificationToFlask(
       String topic, String title, String message, String imageUrl) async {
-    const url = 'https://3fa4e216-8de8-4a49-9951-bb62ce93a50c-00-14nwu0jvbudbk.riker.replit.dev/sendNotification';
+    const url =
+        'https://3fa4e216-8de8-4a49-9951-bb62ce93a50c-00-14nwu0jvbudbk.riker.replit.dev/sendNotification';
     final headers = {'Content-Type': 'application/json'};
     final body = {
       'topic': topic,
@@ -316,7 +317,7 @@ class _AddScreenState extends State<AddScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      //bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: _isLoading
           ? CircularProgressIndicator(
               valueColor:
