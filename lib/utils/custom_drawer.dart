@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uachado/screens/add_screen.dart';
-import 'package:uachado/screens/droppoints_screen.dart';
-import 'package:uachado/screens/item_retrieved.dart';
-import 'package:uachado/screens/subscription_screen.dart';
 
-import '../screens/foundItems_screen.dart';
+import '../constants/app_theme.dart';
+import '../main.dart';
 import '../screens/login_screen.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -33,20 +31,26 @@ class CustomDrawer extends StatelessWidget {
   void _navigateToItemsList(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     // Handle navigation to Items List screen
+    Provider.of<MyAppState>(context, listen: false).currentIndex = 5;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const FoundItemsScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              Provider.of<MyAppState>(context, listen: false).pages[5]),
     ).then((_) {
       // After navigating back from the new page, close the drawer if needed
       scaffoldKey.currentState?.closeEndDrawer();
     });
   }
 
-  void _navigateToReportLostItem(
+  void _navigateToReportFoundItem(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+    Provider.of<MyAppState>(context, listen: false).currentIndex = 3;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              Provider.of<MyAppState>(context, listen: false).pages[3]),
     ).then((_) {
       // After navigating back from the new page, close the drawer if needed
       scaffoldKey.currentState?.closeEndDrawer();
@@ -55,9 +59,13 @@ class CustomDrawer extends StatelessWidget {
 
   void _navigateToDropPoints(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+    Provider.of<MyAppState>(context, listen: false).currentIndex = 4;
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const DropOffPointsScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              Provider.of<MyAppState>(context, listen: false).pages[4]),
     ).then((_) {
       // After navigating back from the new page, close the drawer if needed
       scaffoldKey.currentState?.closeEndDrawer();
@@ -66,9 +74,12 @@ class CustomDrawer extends StatelessWidget {
 
   void _navigateToRetrieveItem(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+    Provider.of<MyAppState>(context, listen: false).currentIndex = 2;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RetrievedItemScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              Provider.of<MyAppState>(context, listen: false).pages[2]),
     ).then((_) {
       // After navigating back from the new page, close the drawer if needed
       scaffoldKey.currentState?.closeEndDrawer();
@@ -77,9 +88,12 @@ class CustomDrawer extends StatelessWidget {
 
   void _navigateToNotifications(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+    Provider.of<MyAppState>(context, listen: false).currentIndex = 6;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              Provider.of<MyAppState>(context, listen: false).pages[6]),
     ).then((_) {
       // After navigating back from the new page, close the drawer if needed
       scaffoldKey.currentState?.closeEndDrawer();
@@ -100,15 +114,19 @@ class CustomDrawer extends StatelessWidget {
               backgroundColor: Colors.white,
               child: Text(
                 userName.isNotEmpty ? userName[0] : "U",
-                style: const TextStyle(fontSize: 40.0),
+                style: TextStyle(
+                  fontSize: 40.0,
+                  color: appTheme.colorScheme.primary,
+                ),
               ),
             ),
             decoration: const BoxDecoration(color: Color(0xFFcab6aa)),
           ),
           if (!onItemsListScreen)
             ListTile(
-              leading: const Icon(Icons.list),
+              leading: Icon(Icons.list, color: appTheme.colorScheme.primary),
               title: const Text('Items List'),
+              textColor: appTheme.colorScheme.primary,
               onTap: () {
                 scaffoldKey.currentState
                     ?.closeEndDrawer(); // Close the right-end drawer
@@ -117,32 +135,37 @@ class CustomDrawer extends StatelessWidget {
             ),
           if (personel && !onFoundItem)
             ListTile(
-              leading: const Icon(Icons.report_problem),
-              title: const Text('Report Lost Item'),
+              leading: Icon(Icons.report_problem,
+                  color: appTheme.colorScheme.primary),
+              title: const Text('Report Found Item'),
+              textColor: appTheme.colorScheme.primary,
               onTap: () {
-                _navigateToReportLostItem(context, scaffoldKey);
+                _navigateToReportFoundItem(context, scaffoldKey);
               },
             ),
           if (personel && !onItemRetrieved)
             ListTile(
-              leading: const Icon(Icons.check),
+              leading: Icon(Icons.check, color: appTheme.colorScheme.primary),
               title: const Text('Mark Item as Found'),
+              textColor: appTheme.colorScheme.primary,
               onTap: () {
                 _navigateToRetrieveItem(context, scaffoldKey);
               },
             ),
           if (!personel && !onDropPoints)
             ListTile(
-              leading: const Icon(Icons.map),
+              leading: Icon(Icons.map, color: appTheme.colorScheme.primary),
               title: const Text('Locate Item Drop Points'),
+              textColor: appTheme.colorScheme.primary,
               onTap: () {
                 _navigateToDropPoints(context, scaffoldKey);
               },
             ),
           if (!personel && !onSub)
             ListTile(
-              leading: const Icon(Icons.warning),
+              leading: Icon(Icons.warning, color: appTheme.colorScheme.primary),
               title: const Text('Report Lost Item'),
+              textColor: appTheme.colorScheme.primary,
               onTap: () {
                 _navigateToNotifications(context, scaffoldKey);
               },
@@ -151,6 +174,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Logout'),
+            textColor: Colors.red,
             onTap: () {
               showDialog(
                 context: context,

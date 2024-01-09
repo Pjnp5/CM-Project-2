@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/add_screen.dart';
+import 'package:uachado/screens/droppoints_screen.dart';
+import 'package:uachado/screens/foundItems_screen.dart';
 import 'package:uachado/screens/home_screen.dart';
 import 'package:uachado/screens/item_retrieved.dart';
 import 'package:uachado/screens/login_screen.dart';
 import 'package:uachado/screens/profile_screen.dart';
+import 'package:uachado/screens/subscription_screen.dart';
 import 'package:uachado/utils/notification_system.dart';
 
 import 'constants/app_theme.dart';
@@ -25,21 +28,9 @@ void main() async {
     );
     final fcmService = FCMService(scaffoldKey: scaffoldKey);
     fcmService.initialize();
-    if (isLoggedIn) {
-      runApp(
-        ChangeNotifierProvider(
-          create: (context) => MyAppState(),
-          child: const MyApp(loggedIn: true),
-        ),
-      );
-    } else {
-      runApp(
-        ChangeNotifierProvider(
-          create: (context) => MyAppState(),
-          child: const MyApp(loggedIn: false),
-        ),
-      );
-    }
+    runApp(
+      MyApp(loggedIn: isLoggedIn),
+    );
   } catch (e) {
     if (kDebugMode) {
       print('Firebase initialization failed: $e');
@@ -126,11 +117,13 @@ class MyAppState extends ChangeNotifier {
 
   // Define your pages here
   final List<Widget> pages = [
-    const HomeScreen(), // First page
+    const HomeScreen(),
     ProfilePage(),
     const RetrievedItemScreen(),
     const AddScreen(),
-
+    const DropOffPointsScreen(),
+    const FoundItemsScreen(),
+    const SubscriptionScreen(),
   ];
 
   Widget get currentPage => MainLayout(child: pages[_currentIndex]);

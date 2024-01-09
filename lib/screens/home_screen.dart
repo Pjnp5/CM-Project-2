@@ -8,14 +8,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uachado/screens/add_screen.dart';
-import 'package:uachado/screens/foundItems_screen.dart';
-import 'package:uachado/screens/item_retrieved.dart';
-import 'package:uachado/screens/subscription_screen.dart';
 
 import '../constants/app_theme.dart';
-import 'droppoints_screen.dart';
+import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -230,7 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const RetrievedItemScreen())),
+                    builder: (context) =>
+                        Provider.of<MyAppState>(context, listen: false)
+                            .pages[2])),
           ),
           _buildFeatureCard(
             'View Items',
@@ -240,7 +239,8 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const FoundItemsScreen())),
+                    builder: (context) => Provider.of<MyAppState>(context, listen: false)
+                        .pages[5])),
           ),
           _buildFeatureCard(
             'Report Found Item',
@@ -248,7 +248,8 @@ class _HomeScreenState extends State<HomeScreen> {
             'Report an item that was dropped in your Point',
             context,
             () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const AddScreen())),
+                MaterialPageRoute(builder: (context) => Provider.of<MyAppState>(context, listen: false)
+                    .pages[3])),
           ),
           // Other personnel-specific options...
         ],
@@ -265,7 +266,8 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const DropOffPointsScreen())),
+                    builder: (context) => Provider.of<MyAppState>(context, listen: false)
+                        .pages[4])),
           ),
           _buildFeatureCard(
             'View Items',
@@ -275,7 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const FoundItemsScreen())),
+                    builder: (context) => Provider.of<MyAppState>(context, listen: false)
+                        .pages[5])),
           ),
           _buildFeatureCard(
             'Report Lost Item',
@@ -285,7 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
             () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const SubscriptionScreen())),
+                    builder: (context) => Provider.of<MyAppState>(context, listen: false)
+                        .pages[6])),
           ),
           // Other personnel-specific options...
         ],
