@@ -282,8 +282,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Icons.report_problem,
             'Subscribe to a topic and when a new item shows up you will know',
             context,
-            () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const SubscriptionScreen())),
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SubscriptionScreen())),
           ),
           // Other personnel-specific options...
         ],
@@ -328,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      //bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -339,7 +341,6 @@ class _HomeScreenState extends State<HomeScreen> {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
       ],
     );
   }

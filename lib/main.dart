@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/home_screen.dart';
 import 'package:uachado/screens/login_screen.dart';
+import 'package:uachado/screens/profile_screen.dart';
 import 'package:uachado/utils/notification_system.dart';
 
 import 'firebase_options.dart';
@@ -14,7 +15,7 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   final GlobalKey<ScaffoldMessengerState> scaffoldKey =
-  GlobalKey<ScaffoldMessengerState>(); // Create a
+      GlobalKey<ScaffoldMessengerState>(); // Create a
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -53,17 +54,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     if (loggedIn) {
       return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: Consumer<MyAppState>(
-        builder: (context, appState, child) {
-          return MaterialApp(
-            home: Scaffold(
-              body: appState.currentPage,
-            ),
-          );
-        },
-      ),
-    );
+        create: (context) => MyAppState(),
+        child: Consumer<MyAppState>(
+          builder: (context, appState, child) {
+            return MaterialApp(
+              home: Scaffold(
+                body: appState.currentPage,
+              ),
+            );
+          },
+        ),
+      );
     } else {
       return ChangeNotifierProvider(
         create: (context) => MyAppState(),
@@ -89,8 +90,21 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<MyAppState>(context, listen: false);
+
     return Scaffold(
       body: child,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: appState.currentIndex,
+        onTap: (index) {
+          appState.currentIndex = index;
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          // Add other items here
+        ],
+      ),
     );
   }
 }
@@ -108,6 +122,7 @@ class MyAppState extends ChangeNotifier {
   // Define your pages here
   final List<Widget> pages = [
     const HomeScreen(), // First page
+    ProfilePage()
   ];
 
   Widget get currentPage => MainLayout(child: pages[_currentIndex]);
