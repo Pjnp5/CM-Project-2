@@ -220,6 +220,7 @@ class _AddScreenState extends State<AddScreen> {
         onDropPoints: false,
         onFoundItem: true,
         onItemRetrieved: false,
+        onSub: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -324,18 +325,6 @@ class _AddScreenState extends State<AddScreen> {
                   AlwaysStoppedAnimation<Color>(appTheme.colorScheme.primary),
             ) // Show loading indicator when processing
           : null,
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
     );
   }
 }

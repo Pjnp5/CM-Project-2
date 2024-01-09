@@ -7,7 +7,7 @@ import '../constants/app_theme.dart';
 import '../utils/custom_drawer.dart';
 
 class RetrievedItemScreen extends StatefulWidget {
-  const RetrievedItemScreen({Key? key}) : super(key: key);
+  const RetrievedItemScreen({super.key});
 
   @override
   _FoundItemsScreenState createState() => _FoundItemsScreenState();
@@ -119,6 +119,7 @@ class _FoundItemsScreenState extends State<RetrievedItemScreen> {
         onDropPoints: false,
         onFoundItem: false,
         onItemRetrieved: true,
+        onSub: false,
       ),
       body: Column(
         children: [
@@ -187,7 +188,6 @@ class _FoundItemsScreenState extends State<RetrievedItemScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -285,17 +285,5 @@ class _FoundItemsScreenState extends State<RetrievedItemScreen> {
         ),
       );
     }
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
-    );
   }
 }

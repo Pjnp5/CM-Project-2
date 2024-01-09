@@ -330,18 +330,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      //bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
     );
   }
 }

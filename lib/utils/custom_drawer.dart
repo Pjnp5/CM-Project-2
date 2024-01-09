@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/droppoints_screen.dart';
 import 'package:uachado/screens/item_retrieved.dart';
@@ -15,6 +16,7 @@ class CustomDrawer extends StatelessWidget {
   final bool onFoundItem; // Add this variable
   final bool onDropPoints;
   final bool onItemRetrieved;
+  final bool onSub;
 
   const CustomDrawer({
     super.key,
@@ -25,6 +27,7 @@ class CustomDrawer extends StatelessWidget {
     required this.onFoundItem,
     required this.onDropPoints, // Initialize this variable
     required this.onItemRetrieved,
+    required this.onSub,
   }); // Pass key parameter to super constructor
 
   void _navigateToItemsList(
@@ -83,12 +86,6 @@ class CustomDrawer extends StatelessWidget {
     });
   }
 
-  void _navigateToSettings(
-      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
-    // Handle navigation to Settings screen
-    // ...
-  }
-
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -142,14 +139,15 @@ class CustomDrawer extends StatelessWidget {
                 _navigateToDropPoints(context, scaffoldKey);
               },
             ),
+          if (!personel && !onSub)
+            ListTile(
+              leading: const Icon(Icons.warning),
+              title: const Text('Report Lost Item'),
+              onTap: () {
+                _navigateToNotifications(context, scaffoldKey);
+              },
+            ),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Subscribe tag'),
-            onTap: () {
-              _navigateToNotifications(context, scaffoldKey);
-            },
-          ),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Logout'),
@@ -167,8 +165,11 @@ class CustomDrawer extends StatelessWidget {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // Clear user data or handle logout logic
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          await prefs.clear();
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (context) => LoginScreen()),

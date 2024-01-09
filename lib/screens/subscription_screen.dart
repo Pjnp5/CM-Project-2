@@ -79,10 +79,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         userName: _userName,
         userEmail: _userEmail,
         personel: _personnel,
-        onItemsListScreen: true,
+        onItemsListScreen: false,
         onDropPoints: false,
         onFoundItem: false,
         onItemRetrieved: false,
+        onSub: true,
       ),
       body: ListView.builder(
         itemCount: tags.length,
@@ -149,7 +150,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -161,15 +161,4 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     scaffoldKey.currentState?.showSnackBar(snackBar);
   }
 
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa), // Use appTheme colors
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
-    );
-  }
 }

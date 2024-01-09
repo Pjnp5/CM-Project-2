@@ -162,7 +162,8 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
         onItemsListScreen: false,
         onDropPoints: true,
         onFoundItem: false,
-        onItemRetrieved:false,
+        onItemRetrieved: false,
+        onSub: false,
       ),
       key: _scaffoldKey,
       body: Container(
@@ -239,7 +240,6 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
               },
             ),
           )),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -279,17 +279,5 @@ class _DropOffPointsScreenState extends State<DropOffPointsScreen> {
 
     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
     _mapController?.animateCamera(cameraUpdate);
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
-    );
   }
 }

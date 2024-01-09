@@ -68,7 +68,6 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
           .collection('departments')
           .doc(depStored)
           .get();
-      print(item);
       var department = departmentSnapshot.data() as Map<String, dynamic>;
       var departmentName = department['Nome']
           .replaceAll(
@@ -104,6 +103,7 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
         onDropPoints: false,
         onFoundItem: false,
         onItemRetrieved: false,
+        onSub: false,
       ),
       body: Column(
         children: [
@@ -137,7 +137,6 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
                 setState(() async {
                   itemsWithDepartment.clear();
                   itemsWithDepartment = await _fetchFoundItems();
-                  ;
                 });
               },
               child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -178,7 +177,6 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
           )
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -235,18 +233,6 @@ class _FoundItemsScreenState extends State<FoundItemsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: const Color(0xFFcab6aa),
-      selectedItemColor: appTheme.colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-      ],
     );
   }
 }

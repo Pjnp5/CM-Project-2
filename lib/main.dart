@@ -3,11 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uachado/screens/add_screen.dart';
 import 'package:uachado/screens/home_screen.dart';
+import 'package:uachado/screens/item_retrieved.dart';
 import 'package:uachado/screens/login_screen.dart';
 import 'package:uachado/screens/profile_screen.dart';
 import 'package:uachado/utils/notification_system.dart';
 
+import 'constants/app_theme.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -95,6 +98,8 @@ class MainLayout extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFFcab6aa),
+        selectedItemColor: appTheme.colorScheme.primary,
         currentIndex: appState.currentIndex,
         onTap: (index) {
           appState.currentIndex = index;
@@ -122,7 +127,10 @@ class MyAppState extends ChangeNotifier {
   // Define your pages here
   final List<Widget> pages = [
     const HomeScreen(), // First page
-    ProfilePage()
+    ProfilePage(),
+    const RetrievedItemScreen(),
+    const AddScreen(),
+
   ];
 
   Widget get currentPage => MainLayout(child: pages[_currentIndex]);
